@@ -1,0 +1,44 @@
+{
+    "name": "sajjadhossainshohag/laravel-permission-scanner",
+    "description": "Permission Scanner Tool is a scans your application for @can, @canany, and permission middleware usage in controllers, routes, and Blade views. It helps developers analyze and manage role-based access control (RBAC) by extracting all permission-related directives efficiently.",
+    "keywords": [
+        "laravel-permissions-extractor",
+        "authorization",
+        "scanner",
+        "blade",
+        "can",
+        "canany",
+        "role-management",
+        "access-control",
+        "gate",
+        "auth",
+        "security",
+        "audit"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "laravel/framework": "^8.0|^9.0|^10.0|^11.0|^12.0",
+        "nikic/php-parser": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sajjadhossainshohag\\LaravelPermissionScanner\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Sajjad Hossain Shohag",
+            "email": "sajjadhossainshohagbd@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Sajjadhossainshohag\\LaravelPermissionScanner\\PermissionScannerServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
