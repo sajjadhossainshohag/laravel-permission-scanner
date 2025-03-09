@@ -15,7 +15,7 @@ class PermissionExtractor
         $results = [];
         $files = self::getPhpFiles($path);
 
-        echo 'Found '.count($files)." PHP files to scan\n"; // Debug info
+        echo 'Found '.count($files)." PHP files to scan\n";
 
         $fileCount = 0;
         $errorCount = 0;
@@ -33,19 +33,24 @@ class PermissionExtractor
                     continue;
                 }
 
+                $allPermissions = [];
+
                 // Check for patterns in the raw file content first (catches string literals)
                 $simpleMatches = self::findPermissionPatternsInRawContent($content);
                 if (! empty($simpleMatches)) {
-                    $results[$file] = array_merge($results[$file] ?? [], $simpleMatches);
-                    $permissionsFound = array_merge($permissionsFound, $simpleMatches);
+                    $allPermissions = array_merge($allPermissions, $simpleMatches);
                 }
 
                 // Then do the more sophisticated AST parsing
                 $permissions = self::extractPermissions($content, $file);
-
                 if (! empty($permissions)) {
-                    $results[$file] = array_unique(array_merge($results[$file] ?? [], $permissions));
-                    $permissionsFound = array_merge($permissionsFound, $permissions);
+                    $allPermissions = array_merge($allPermissions, $permissions);
+                }
+
+                // Remove duplicates and store unique permissions
+                if (! empty($allPermissions)) {
+                    $results[$file] = array_values(array_unique($allPermissions));
+                    $permissionsFound = array_merge($permissionsFound, $results[$file]);
                 }
 
                 // Display progress every 100 files
@@ -57,9 +62,6 @@ class PermissionExtractor
                 $errorCount++;
             }
         }
-
-        echo "Scan complete. Processed $fileCount files with $errorCount errors.\n";
-        echo 'Found permissions in '.count($results)." files.\n";
 
         return $results;
     }
