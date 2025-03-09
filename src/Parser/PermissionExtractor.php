@@ -2,11 +2,11 @@
 
 namespace Sajjadhossainshohag\LaravelPermissionScanner\Parser;
 
+use PhpParser\Error;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\ParserFactory;
-use PhpParser\Error;
 
 class PermissionExtractor
 {
@@ -15,7 +15,7 @@ class PermissionExtractor
         $results = [];
         $files = self::getPhpFiles($path);
 
-        echo "Found " . count($files) . " PHP files to scan\n"; // Debug info
+        echo 'Found '.count($files)." PHP files to scan\n"; // Debug info
 
         $fileCount = 0;
         $errorCount = 0;
@@ -29,12 +29,13 @@ class PermissionExtractor
                 if ($content === false) {
                     echo "Error reading file: $file\n";
                     $errorCount++;
+
                     continue;
                 }
 
                 // Check for patterns in the raw file content first (catches string literals)
                 $simpleMatches = self::findPermissionPatternsInRawContent($content);
-                if (!empty($simpleMatches)) {
+                if (! empty($simpleMatches)) {
                     $results[$file] = array_merge($results[$file] ?? [], $simpleMatches);
                     $permissionsFound = array_merge($permissionsFound, $simpleMatches);
                 }
@@ -42,7 +43,7 @@ class PermissionExtractor
                 // Then do the more sophisticated AST parsing
                 $permissions = self::extractPermissions($content, $file);
 
-                if (!empty($permissions)) {
+                if (! empty($permissions)) {
                     $results[$file] = array_unique(array_merge($results[$file] ?? [], $permissions));
                     $permissionsFound = array_merge($permissionsFound, $permissions);
                 }
@@ -52,13 +53,13 @@ class PermissionExtractor
                     echo "Processed $fileCount files...\n";
                 }
             } catch (\Exception $e) {
-                echo "Exception while processing $file: " . $e->getMessage() . "\n";
+                echo "Exception while processing $file: ".$e->getMessage()."\n";
                 $errorCount++;
             }
         }
 
         echo "Scan complete. Processed $fileCount files with $errorCount errors.\n";
-        echo "Found permissions in " . count($results) . " files.\n";
+        echo 'Found permissions in '.count($results)." files.\n";
 
         return $results;
     }
@@ -120,7 +121,7 @@ class PermissionExtractor
 
         try {
             // Check if path exists
-            if (!file_exists($path)) {
+            if (! file_exists($path)) {
                 throw new \Exception("Path does not exist: $path");
             }
 
@@ -144,7 +145,7 @@ class PermissionExtractor
                 }
             }
         } catch (\Exception $e) {
-            echo "Error scanning directory: " . $e->getMessage() . "\n";
+            echo 'Error scanning directory: '.$e->getMessage()."\n";
         }
 
         return $files;
@@ -152,10 +153,12 @@ class PermissionExtractor
 
     private static function extractPermissions($code, $filename = 'unknown')
     {
-        $parser = (new ParserFactory())->createForNewestSupportedVersion();
-        $traverser = new NodeTraverser();
-        $visitor = new class extends NodeVisitorAbstract {
+        $parser = (new ParserFactory)->createForNewestSupportedVersion();
+        $traverser = new NodeTraverser;
+        $visitor = new class extends NodeVisitorAbstract
+        {
             public $permissions = [];
+
             public $currentClass = null;
 
             public function enterNode(Node $node)
@@ -237,7 +240,7 @@ class PermissionExtractor
                     // Then handle comma-separated permissions (permission1,permission2)
                     foreach (explode(',', $pipePermission) as $permission) {
                         $trimmed = trim($permission);
-                        if (!empty($trimmed)) {
+                        if (! empty($trimmed)) {
                             $this->permissions[] = $trimmed;
                         }
                     }
@@ -342,10 +345,11 @@ class PermissionExtractor
         foreach ($results as $file => $permissions) {
             $permissionCount += count($permissions);
             echo "File: $file\n";
-            echo "  Permissions: " . implode(", ", $permissions) . "\n";
+            echo '  Permissions: '.implode(', ', $permissions)."\n";
         }
 
-        echo "Total: " . count($results) . " files with $permissionCount permissions found.\n";
+        echo 'Total: '.count($results)." files with $permissionCount permissions found.\n";
+
         return $results;
     }
 }

@@ -8,6 +8,7 @@ use Sajjadhossainshohag\LaravelPermissionScanner\Parser\PermissionExtractor;
 class ScanPermissionsCommand extends Command
 {
     protected $signature = 'permission:scan {--path=resources/views : The path to scan}';
+
     protected $description = 'Scan for permissions in the given path (default: app)';
 
     public function handle()
