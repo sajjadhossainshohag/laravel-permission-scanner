@@ -55,9 +55,11 @@
     "lint": "pint",
     "test:lint": "pint",
     "test:types": "phpstan analyse src --ansi",
+    "test:pest": "pest",
     "test": [
       "@test:lint",
-      "@test:types"
+      "@test:types",
+      "@test:pest"
     ]
   }
 }
