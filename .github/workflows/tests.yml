@@ -19,48 +19,57 @@ jobs:
           - php-version: 8.4
             laravel: 12.*
             pest: ^3.0
+            pint: ^1.13
           - php-version: 8.3
             laravel: 12.*
             pest: ^3.0
+            pint: ^1.13
           - php-version: 8.2
             laravel: 12.*
             pest: ^3.0
+            pint: ^1.13
 
-          # Laravel 11 requires PHP 8.1+
+          # Laravel 11 requires PHP 8.2+
           - php-version: 8.4
             laravel: 11.*
             pest: ^3.0
+            pint: ^1.13
           - php-version: 8.3
             laravel: 11.*
             pest: ^3.0
+            pint: ^1.13
           - php-version: 8.2
             laravel: 11.*
             pest: ^3.0
-          - php-version: 8.1
-            laravel: 11.*
-            pest: ^3.0
+            pint: ^1.13
 
-          # Laravel 10 requires PHP 8.0+
+          # Laravel 10 requires PHP 8.1+
           - php-version: 8.4
             laravel: 10.*
             pest: ^2.0
+            pint: ^1.13
           - php-version: 8.3
             laravel: 10.*
             pest: ^2.0
+            pint: ^1.13
           - php-version: 8.2
             laravel: 10.*
             pest: ^2.0
+            pint: ^1.13
           - php-version: 8.1
             laravel: 10.*
             pest: ^2.0
+            pint: ~1.11.0
 
           # Laravel 9 requires PHP 8.0 - 8.1
           - php-version: 8.1
             laravel: 9.*
             pest: ^1.0
+            pint: ~1.11.0
           - php-version: 8.0
             laravel: 9.*
             pest: ^1.0
+            pint: ~1.10.0
             
     steps:
       - name: Checkout Repository
@@ -76,10 +85,18 @@ jobs:
         run: rm -f composer.lock
 
       - name: Configure Laravel Version
-        run: composer require laravel/framework:${{ matrix.laravel }} --no-update
+        run: |
+          if [ "${{ matrix.php-version }}" = "8.0" ] || [ "${{ matrix.php-version }}" = "8.1" -a "${{ matrix.laravel }}" = "11.*" ]; then
+            echo "Skipping job - PHP version not compatible with Laravel version"
+            exit 0
+          fi
+          composer require "laravel/framework:${{ matrix.laravel }}" --no-update
 
       - name: Configure Pest Version
-        run: composer require pestphp/pest:${{ matrix.pest }} --dev --no-update
+        run: composer require "pestphp/pest:${{ matrix.pest }}" --dev --no-update
+
+      - name: Configure Laravel Pint Version
+        run: composer require "laravel/pint:${{ matrix.pint }}" --dev --no-update
 
       - name: Install Dependencies
         run: composer update --prefer-dist --no-interaction --no-progress
