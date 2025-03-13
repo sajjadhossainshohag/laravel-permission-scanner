@@ -67,7 +67,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          composer require laravel/framework:${{ matrix.laravel }} --no-update
+          composer require laravel/framework:${{ matrix.laravel }} --with-all-dependencies --no-update
           composer update --prefer-dist --no-interaction --no-progress
 
       - name: Run Tests
