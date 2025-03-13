@@ -1,21 +1,19 @@
 name: CI
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   test:
-    name: Run Tests on PHP ${{ matrix.php-version }} with Laravel ${{ matrix.laravel }}
+    name: PHP ${{ matrix.php-version }} / Laravel ${{ matrix.laravel }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Laravel 12 requires PHP 8.2+
+          # Laravel 12 (PHP 8.2+)
           - php-version: 8.4
             laravel: 12.*
             pest: ^3.0
@@ -29,7 +27,7 @@ jobs:
             pest: ^3.0
             pint: ^1.13
 
-          # Laravel 11 requires PHP 8.2+
+          # Laravel 11 (PHP 8.2+)
           - php-version: 8.4
             laravel: 11.*
             pest: ^3.0
@@ -42,59 +40,41 @@ jobs:
             laravel: 11.*
             pest: ^3.0
             pint: ^1.13
-
-          # Laravel 10 requires PHP 8.1+
-          - php-version: 8.4
-            laravel: 10.*
-            pest: ^2.0
-            pint: ^1.13
-          - php-version: 8.3
-            laravel: 10.*
-            pest: ^2.0
-            pint: ^1.13
-          - php-version: 8.2
-            laravel: 10.*
-            pest: ^2.0
-            pint: ^1.13
-          - php-version: 8.1
-            laravel: 10.*
-            pest: ^2.0
-            pint: ~1.11.0
-
-          # Laravel 9 requires PHP 8.0 - 8.1
-          - php-version: 8.1
-            laravel: 9.*
-            pest: ^1.0
-            pint: ~1.11.0
+    
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
+      # Improved PHP setup with extensions and coverage
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          tools: composer
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, bcmath, intl, exif, iconv
+          coverage: none
+          tools: composer:v2
 
-      - name: Remove Existing Composer Lock
-        run: rm -f composer.lock
+      # Cache dependencies to speed up workflow
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: Configure Laravel Version
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php-version }}-${{ matrix.laravel }}
+          restore-keys: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ matrix.laravel }}
+
+      - name: Configure dependencies
         run: |
-          if [ "${{ matrix.php-version }}" = "8.0" ] || [ "${{ matrix.php-version }}" = "8.1" -a "${{ matrix.laravel }}" = "11.*" ]; then
-            echo "Skipping job - PHP version not compatible with Laravel version"
-            exit 0
-          fi
+          rm -f composer.lock
           composer require "laravel/framework:${{ matrix.laravel }}" --no-update
+          composer require "pestphp/pest:${{ matrix.pest }}" --dev --no-update
+          composer require "laravel/pint:${{ matrix.pint }}" --dev --no-update
 
-      - name: Configure Pest Version
-        run: composer require "pestphp/pest:${{ matrix.pest }}" --dev --no-update
-
-      - name: Configure Laravel Pint Version
-        run: composer require "laravel/pint:${{ matrix.pint }}" --dev --no-update
-
-      - name: Install Dependencies
+      - name: Install dependencies
         run: composer update --prefer-dist --no-interaction --no-progress
 
-      - name: Run Tests
+      - name: Run tests
         run: composer test
