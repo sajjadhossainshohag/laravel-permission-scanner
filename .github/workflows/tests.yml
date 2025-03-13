@@ -66,11 +66,6 @@ jobs:
             laravel: 9.*
             pest: ^1.0
             pint: ~1.11.0
-          - php-version: 8.0
-            laravel: 9.*
-            pest: ^1.0
-            pint: ~1.10.0
-            
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
