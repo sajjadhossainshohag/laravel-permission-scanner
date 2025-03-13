@@ -18,34 +18,49 @@ jobs:
           # Laravel 12 requires PHP 8.2+
           - php-version: 8.4
             laravel: 12.*
+            pest: ^3.0
           - php-version: 8.3
             laravel: 12.*
+            pest: ^3.0
           - php-version: 8.2
             laravel: 12.*
+            pest: ^3.0
 
           # Laravel 11 requires PHP 8.1+
           - php-version: 8.4
             laravel: 11.*
+            pest: ^3.0
           - php-version: 8.3
             laravel: 11.*
+            pest: ^3.0
           - php-version: 8.2
             laravel: 11.*
+            pest: ^3.0
+          - php-version: 8.1
+            laravel: 11.*
+            pest: ^3.0
 
           # Laravel 10 requires PHP 8.0+
           - php-version: 8.4
             laravel: 10.*
+            pest: ^2.0
           - php-version: 8.3
             laravel: 10.*
+            pest: ^2.0
           - php-version: 8.2
             laravel: 10.*
+            pest: ^2.0
           - php-version: 8.1
             laravel: 10.*
+            pest: ^2.0
 
           # Laravel 9 requires PHP 8.0 - 8.1
           - php-version: 8.1
             laravel: 9.*
+            pest: ^1.0
           - php-version: 8.0
             laravel: 9.*
+            pest: ^1.0
             
     steps:
       - name: Checkout Repository
@@ -63,8 +78,11 @@ jobs:
       - name: Configure Laravel Version
         run: composer require laravel/framework:${{ matrix.laravel }} --no-update
 
+      - name: Configure Pest Version
+        run: composer require pestphp/pest:${{ matrix.pest }} --dev --no-update
+
       - name: Install Dependencies
-        run: composer update --prefer-dist --no-interaction --no-progress --no-suggest
+        run: composer update --prefer-dist --no-interaction --no-progress
 
       - name: Run Tests
         run: composer test
