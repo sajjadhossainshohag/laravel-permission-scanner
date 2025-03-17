@@ -4,30 +4,132 @@ The **Laravel Permission Scanner** helps you manage role-based access control (R
 
 ## Features
 
-- Scans PHP files for `@can`, `@canany`, `middleware`, `Gate`, and permission methods.
-- Detects permission usage in controllers, routes, and Blade views.
-- Analyzes permissions using AST parsing.
-- Supports scanning middleware and method calls for permissions.
-- Provides detailed results of found permissions across files.
-- Allows debugging with detailed file and permission output.
+- Scans PHP files for `@can`, `@canany`, `middleware`, `Gate`, and permission methods
+- Detects permission usage in:
+  - Controllers
+  - Routes
+  - Blade views
+  - Middleware
+- Analyzes permissions using AST parsing
+- Generates permission seeders automatically
+- Provides detailed results of found permissions across files
+- Supports debugging with detailed file and permission output
+
+## Requirements
+
+- PHP 8.1 or higher
+- Laravel 8.0 or higher
 
 ## Installation
+
 Install the package via Composer:
 
-   ```bash
-   composer require sajjadhossainshohag/laravel-permission-scanner
-   ```
+```bash
+composer require sajjadhossainshohag/laravel-permission-scanner
+```
+
+## Configuration
+
+Publish the configuration file:
+
+```bash
+php artisan vendor:publish --provider="Sajjadhossainshohag\LaravelPermissionScanner\PermissionScannerServiceProvider"
+```
+
+This will create a `config/scanner.php` file where you can customize the scan paths:
+
+```php
+return [
+    'scan_paths' => [
+        'resources/views',
+        'app',
+        'routes',
+    ],
+];
+```
+
 ## Usage
-1. Run the command to scan your application:
 
-   ```bash
-   php artisan permission:scan
-   ```
+### Basic Scanning
 
-2. The command will scan your application for permissions and display the results.
+Run the command to scan your application:
+
+```bash
+php artisan permission:scan
+```
+
+This will display all found permissions in your application.
+
+### Generate Permission Seeder
+
+To automatically generate a seeder file with found permissions:
+
+```bash
+php artisan permission:scan --seeder=PermissionsTableSeeder
+```
+
+This will create a new seeder file in `database/seeders` with all discovered permissions.
+
+Example output:
+```php
+class PermissionsTableSeeder extends Seeder
+{
+    public function run()
+    {
+        $permissions = [
+            ['name' => 'edit-posts', 'guard_name' => 'web'],
+            ['name' => 'delete-posts', 'guard_name' => 'web'],
+            // ...
+        ];
+
+        DB::table('permissions')->insert($permissions);
+    }
+}
+```
+
+## What It Scans For
+
+The scanner detects permissions in:
+
+1. Blade Directives:
+   - `@can('permission-name')`
+   - `@canany(['permission-1', 'permission-2'])`
+
+2. Controller Methods:
+   - `$this->authorize('permission-name')`
+   - `Gate::allows('permission-name')`
+
+3. Route Definitions:
+   - `->middleware('can:permission-name')`
+   - `->middleware('permission:permission-name')`
+
+4. Policy Methods:
+   - Permission-related method names and checks
 
 ## Contributing
-If you have any suggestions or improvements, feel free to open an issue or submit a pull request. Your contributions are greatly appreciated!
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Development
+
+```bash
+# Install dependencies
+composer install
+
+# Run tests
+composer test
+```
 
 ## License
+
+This package is open-source software licensed under the [MIT license](LICENSE).
+
+## Credits
+
 This package is open-source software licensed under the [MIT license](LICENSE).
