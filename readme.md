@@ -27,7 +27,7 @@ The **Laravel Permission Scanner** helps you manage role-based access control (R
 Install the package via Composer:
 
 ```bash
-composer require sajjadhossainshohag/laravel-permission-scanner
+composer require sajjadhossainshohag/laravel-permission-scanner:v0.1.0-beta
 ```
 
 ## Configuration
