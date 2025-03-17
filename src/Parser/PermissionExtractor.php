@@ -10,12 +10,10 @@ use PhpParser\ParserFactory;
 
 class PermissionExtractor
 {
-    public static function scan($path)
+    public static function scan(array $paths)
     {
         $results = [];
-        $files = self::getPhpFiles($path);
-
-        echo 'Found '.count($files)." PHP files to scan\n";
+        $files = self::getPhpFiles($paths);
 
         $fileCount = 0;
         $errorCount = 0;
@@ -116,41 +114,48 @@ class PermissionExtractor
         return $permissions;
     }
 
-    private static function getPhpFiles($path)
+    private static function getPhpFiles($paths)
     {
         // Create an array to store all PHP files
         $files = [];
 
-        try {
-            // Check if path exists
-            if (! file_exists($path)) {
-                throw new \Exception("Path does not exist: $path");
-            }
+        // Convert single path to array for consistent handling
+        $paths = is_array($paths) ? $paths : [$paths];
 
-            // Use RecursiveDirectoryIterator to iterate through the directory and its subdirectories
-            $directoryIterator = new \RecursiveDirectoryIterator(
-                $path,
-                \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS
-            );
+        foreach ($paths as $path) {
+            try {
+                // Check if path exists
+                if (! file_exists($path)) {
+                    echo "Warning: Path does not exist: $path\n";
 
-            $iterator = new \RecursiveIteratorIterator(
-                $directoryIterator,
-                \RecursiveIteratorIterator::LEAVES_ONLY
-            );
-
-            // Iterate through each item found
-            foreach ($iterator as $file) {
-                // Check if the current item is a PHP file
-                if ($file->isFile() && $file->getExtension() === 'php') {
-                    // Add the file path to the files array
-                    $files[] = $file->getRealPath();
+                    continue;
                 }
+
+                // Use RecursiveDirectoryIterator to iterate through the directory and its subdirectories
+                $directoryIterator = new \RecursiveDirectoryIterator(
+                    $path,
+                    \RecursiveDirectoryIterator::SKIP_DOTS | \RecursiveDirectoryIterator::FOLLOW_SYMLINKS
+                );
+
+                $iterator = new \RecursiveIteratorIterator(
+                    $directoryIterator,
+                    \RecursiveIteratorIterator::LEAVES_ONLY
+                );
+
+                // Iterate through each item found
+                foreach ($iterator as $file) {
+                    // Check if the current item is a PHP file
+                    if ($file->isFile() && $file->getExtension() === 'php') {
+                        // Add the file path to the files array
+                        $files[] = $file->getRealPath();
+                    }
+                }
+            } catch (\Exception $e) {
+                echo "Error scanning directory '$path': ".$e->getMessage()."\n";
             }
-        } catch (\Exception $e) {
-            echo 'Error scanning directory: '.$e->getMessage()."\n";
         }
 
-        return $files;
+        return array_unique($files);
     }
 
     private static function extractPermissions($code, $filename = 'unknown')

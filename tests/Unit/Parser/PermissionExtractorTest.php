@@ -3,7 +3,7 @@
 use Sajjadhossainshohag\LaravelPermissionScanner\Parser\PermissionExtractor;
 
 beforeEach(function () {
-    $this->testFilesPath = __DIR__ . '/test-files';
+    $this->testFilesPath = __DIR__.'/test-files';
     if (! file_exists($this->testFilesPath)) {
         mkdir($this->testFilesPath, 0777, true);
     }
@@ -14,7 +14,7 @@ afterEach(function () {
         $files = scandir($this->testFilesPath);
         foreach ($files as $file) {
             if ($file !== '.' && $file !== '..') {
-                unlink($this->testFilesPath . '/' . $file);
+                unlink($this->testFilesPath.'/'.$file);
             }
         }
         rmdir($this->testFilesPath);
@@ -23,7 +23,7 @@ afterEach(function () {
 
 function createTestFile(string $filename, string $content): string
 {
-    $filepath = test()->testFilesPath . '/' . $filename;
+    $filepath = test()->testFilesPath.'/'.$filename;
     file_put_contents($filepath, $content);
 
     return $filepath;
@@ -45,7 +45,7 @@ test('scan finds permissions in middleware', function () {
         PHP
     );
 
-    $results = PermissionExtractor::scan($this->testFilesPath);
+    $results = PermissionExtractor::scan([$this->testFilesPath]);
 
     expect($results)
         ->toBeArray()
@@ -73,7 +73,7 @@ test('scan finds permissions in can methods', function () {
         PHP
     );
 
-    $results = PermissionExtractor::scan($this->testFilesPath);
+    $results = PermissionExtractor::scan([$this->testFilesPath]);
     $realpath = realpath($testFile);
 
     expect($results)
@@ -103,7 +103,7 @@ test('scan finds permissions in gate methods', function () {
         PHP
     );
 
-    $results = PermissionExtractor::scan($this->testFilesPath);
+    $results = PermissionExtractor::scan([$this->testFilesPath]);
 
     $realpath = realpath($testFile);
 
@@ -133,7 +133,7 @@ test('scan finds permissions in blade directives', function () {
         PHP
     );
 
-    $results = PermissionExtractor::scan($this->testFilesPath);
+    $results = PermissionExtractor::scan([$this->testFilesPath]);
 
     expect($results)->toBeArray()->toHaveCount(1)->toHaveKey(realpath($testFile))->and($results[realpath($testFile)])->toHaveCount(2)->toContainEqual('edit-profile', 'delete-account');
 });
@@ -141,7 +141,7 @@ test('scan finds permissions in blade directives', function () {
 test('scan handles invalid files', function () {
     $testFile = createTestFile('InvalidSyntax.php', '<?php this is invalid PHP code;');
 
-    $results = PermissionExtractor::scan($this->testFilesPath);
+    $results = PermissionExtractor::scan([$this->testFilesPath]);
 
     expect($results)
         ->toBeArray()
