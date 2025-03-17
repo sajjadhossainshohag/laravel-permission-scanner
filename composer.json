@@ -1,6 +1,7 @@
 {
   "name": "sajjadhossainshohag/laravel-permission-scanner",
   "description": "Permission Scanner Tool is a scans your application for @can, @canany, and permission middleware usage in controllers, routes, and Blade views. It helps developers analyze and manage role-based access control (RBAC) by extracting all permission-related directives efficiently.",
+  "version": "0.1.0-beta",
   "keywords": [
     "laravel-permissions-extractor",
     "authorization",
