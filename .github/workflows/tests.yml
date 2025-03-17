@@ -1,0 +1,80 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php-version }} / Laravel ${{ matrix.laravel }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Laravel 12 (PHP 8.2+)
+          - php-version: 8.4
+            laravel: 12.*
+            pest: ^3.0
+            pint: ^1.13
+          - php-version: 8.3
+            laravel: 12.*
+            pest: ^3.0
+            pint: ^1.13
+          - php-version: 8.2
+            laravel: 12.*
+            pest: ^3.0
+            pint: ^1.13
+
+          # Laravel 11 (PHP 8.2+)
+          - php-version: 8.4
+            laravel: 11.*
+            pest: ^3.0
+            pint: ^1.13
+          - php-version: 8.3
+            laravel: 11.*
+            pest: ^3.0
+            pint: ^1.13
+          - php-version: 8.2
+            laravel: 11.*
+            pest: ^3.0
+            pint: ^1.13
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Improved PHP setup with extensions and coverage
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, bcmath, intl, exif, iconv
+          coverage: none
+          tools: composer:v2
+
+      # Cache dependencies to speed up workflow
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php-version }}-${{ matrix.laravel }}
+          restore-keys: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ matrix.laravel }}
+
+      - name: Configure dependencies
+        run: |
+          rm -f composer.lock
+          composer require "laravel/framework:${{ matrix.laravel }}" --no-update
+          composer require "pestphp/pest:${{ matrix.pest }}" --dev --no-update
+          composer require "laravel/pint:${{ matrix.pint }}" --dev --no-update
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests
+        run: composer test
