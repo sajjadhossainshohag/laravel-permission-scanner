@@ -8,7 +8,7 @@ use Sajjadhossainshohag\LaravelPermissionScanner\Parser\PermissionExtractor;
 
 class ScanPermissionsCommand extends Command
 {
-    protected $signature = 'permission:scan {--seeder= : Name of the seeder file}';
+    protected $signature = 'permission:scan {--seeder? : Name of the seeder file}';
 
     protected $description = 'Scan for permissions in the given path (default: resources/views, app, routes)';
 
