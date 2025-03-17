@@ -2,6 +2,8 @@
 
 The **Laravel Permission Scanner** helps you manage role-based access control (RBAC) in your Laravel application by scanning for the usage of `@can`, `@canany`, and permission middleware in controllers, routes, and Blade views. It provides an easy way to analyze and track permission-related directives across your app.
 
+> Note: Laravel Permission Scanner is currently in beta version.
+
 ## Features
 
 - Scans PHP files for `@can`, `@canany`, `middleware`, `Gate`, and permission methods
