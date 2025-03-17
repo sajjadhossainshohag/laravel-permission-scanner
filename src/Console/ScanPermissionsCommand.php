@@ -8,7 +8,7 @@ use Sajjadhossainshohag\LaravelPermissionScanner\Parser\PermissionExtractor;
 
 class ScanPermissionsCommand extends Command
 {
-    protected $signature = 'permission:scan {--seeder? : Name of the seeder file}';
+    protected $signature = 'permission:scan {--seeder= : Name of the seeder file}';
 
     protected $description = 'Scan for permissions in the given path (default: resources/views, app, routes)';
 
@@ -20,17 +20,19 @@ class ScanPermissionsCommand extends Command
         $results = PermissionExtractor::scan($paths);
 
         $permissions = collect($results)->flatten()->unique()->sort()->values()->all();
-        $this->info('Found ' . count($permissions) . ' permissions: ' . implode(', ', $permissions));
 
-        if ($this->option('seeder')) {
-            $this->createSeederFile($permissions);
+        if (!$this->option('seeder')) {
+            $this->info('Found permissions: ' . implode(', ', $permissions));
+            return;
         }
+
+        $this->createSeederFile($permissions);
     }
 
     protected function createSeederFile(array $permissions): void
     {
-        $name = $this->argument('seeder') ?? 'PermissionsSeeder';
-        $seederPath = __DIR__ . '/database/seeders/' . $name . '.php';;
+        $name = $this->option('seeder') ?? 'PermissionsSeeder';
+        $seederPath = database_path('seeders/' . $name . '.php');
 
         $content = $this->generateSeederContent($permissions, $name);
 
